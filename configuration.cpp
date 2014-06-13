@@ -1,10 +1,8 @@
 #include "configuration.h"
 
-Configuration::Configuration()
-{
-    totalSteps = 5;
-    reactSteps = 1;
-}
+Configuration::Configuration():
+totalSteps(5), reactSteps(1),tbr(new std::vector<Ball*>(12)), threshold(0.2), density_x(5), density_y(5), diffusionNode(3)
+{}
 
 void Configuration::setParallel(int nb, int nbMax)
 {
@@ -26,7 +24,7 @@ void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_
 
         threshold = 0.2;
 
-        tbr = new std::vector<Ball*>(12);
+        //tbr = new std::vector<Ball*>(12);
         std::cout<<"ICi"<<std::endl;
 
         for(int i = 0 ; i < 10; i++)
@@ -34,7 +32,7 @@ void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_
             float t[]= {0,0};
             //std::cout<<i<<std::endl;
             t[0] = t[1] = 0.1*(2+(float)i);
-            Species *s = new Species();
+            Species *s = new Species(2,t,2,t);
             Reaction *r = new Reaction();
             Ball* k = new Ball(s, r ,2 ,t );
             //std::cout<<"juste une truc"<<std::endl;
