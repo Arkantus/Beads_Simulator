@@ -20,7 +20,8 @@ private:
     Reaction * reactions;
     int reactionNumbers;
     float * coord;
-    const gsl_odeiv_step_type * stepper = gsl_odeiv_step_bsimp;
+    //constexpr
+    gsl_odeiv_step_type * stepper;// = gsl_odeiv_step_bsimp;
     gsl_odeiv_step * s;
     gsl_odeiv_control * c;
     gsl_odeiv_evolve * e;
@@ -29,6 +30,7 @@ private:
 
 public:
     Ball();
+    Ball(const Ball&);
     float x();
     float y();
     Species* species;
@@ -36,6 +38,7 @@ public:
     void move();
     Ball(Species*, Reaction*, int, float*);
     void compute(int n_steps);
+    Ball& operator=(const Ball&);
     Species getSpecies();
     ~Ball();
 

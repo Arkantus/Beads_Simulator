@@ -12,10 +12,10 @@
 class Species
 {
 public:
-    Species();
+    //Species();
     Species(int prodCount, float * prodConc, int enzyCount, float * enzyConc);
     std::string getString();
-    Species& operator *(const int);
+    Species operator *(const int);
     void operator +=(const Species&);
     void operator =(const Species&);
     Species(const Species& rhs);

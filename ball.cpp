@@ -2,6 +2,7 @@
 
 Ball::Ball(Species* init_s, Reaction * init_r, int num_r, float * pos)
 {
+    stepper = gsl_odeiv_step_bsimp;
     this->species = init_s;
     this->reactions = init_r;
     this->reactionNumbers = num_r;
@@ -21,6 +22,53 @@ Ball::Ball(Species* init_s, Reaction * init_r, int num_r, float * pos)
     sys.jacobian = jac;
     sys.params = (void*)&mu;
 }
+
+    Ball& Ball::operator=(const Ball& rhs)
+    {
+        stepper = gsl_odeiv_step_bsimp;
+        this->species = rhs.species;
+        this->reactions = rhs.reactions;
+        this->reactionNumbers = rhs->reactionNumbers;
+        this->coord = new float[2];
+        this->coord[0] = rhs.coord[0];
+        this->coord[1] = rhs.coord[1];
+
+        s = gsl_odeiv_step_alloc (stepper, 2);
+        c = gsl_odeiv_control_y_new (1e-6, 0.0);
+        e = gsl_odeiv_evolve_alloc (2);
+
+        std::cout<<this->coord[0]<<std::endl;
+
+        double mu = 10;
+        sys.dimension = 2;
+        sys.function = func;
+        sys.jacobian = jac;
+        sys.params = (void*)&mu;
+    }
+
+    Ball::Ball(const Ball& rhs)
+    {
+        stepper = gsl_odeiv_step_bsimp;
+        this->species = rhs.species;
+        this->reactions = rhs.reactions;
+        this->reactionNumbers = rhs->reactionNumbers;
+        this->coord = new float[2];
+        this->coord[0] = rhs.coord[0];
+        this->coord[1] = rhs.coord[1];
+
+        s = gsl_odeiv_step_alloc (stepper, 2);
+        c = gsl_odeiv_control_y_new (1e-6, 0.0);
+        e = gsl_odeiv_evolve_alloc (2);
+
+//        std::cout<<this->coord[0]<<std::endl;
+
+        double mu = 10;
+        sys.dimension = 2;
+        sys.function = func;
+        sys.jacobian = jac;
+        sys.params = (void*)&mu;
+    }
+
 
 float d(const Ball &b1, const Ball &b2)
 {
@@ -56,7 +104,7 @@ void Ball::compute(int n_steps)
 Ball::~Ball()
 {
     static int i = 0;
-    std::cout << "Destructor je suis appelé pour là " << ++i <<"ieme fois"<<std::endl;
+//    std::cout << "Destructor je suis appelé pour là " << ++i <<"ieme fois"<<std::endl;
 
     gsl_odeiv_evolve_free (e);
     gsl_odeiv_control_free (c);

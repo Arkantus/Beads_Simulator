@@ -6,7 +6,7 @@ Species::Species(int prodCount, float *prodConc, int enzyCount, float *enzyConc)
 {
 
 }
-Species::Species(){}
+//Species::Species(){}
 
 std::string Species::getString()
 {
@@ -22,7 +22,7 @@ std::string Species::getString()
 }
 
 
-Species &Species::operator *(const int factor)
+Species Species::operator *(const int factor)
 {
     Species *s = new Species(*this);
     for(int i = 0 ; i < this->pCount ; i++)
