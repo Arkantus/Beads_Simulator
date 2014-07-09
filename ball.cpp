@@ -1,73 +1,175 @@
 #include "ball.h"
 
-Ball::Ball(Species* init_s, Reaction * init_r, int num_r, float * pos)
+int Ball::index_max = 0;
+
+Ball::Ball(Species* init_s, std::vector<Reaction> init_react, float * pos, Species *tbS)
 {
-    stepper = gsl_odeiv_step_bsimp;
-    this->species = init_s;
-    this->reactions = init_r;
-    this->reactionNumbers = num_r;
+    index = index_max;
+    index_max++;
+
+    init = true;
+    this->species = new Species(*init_s);
+    this->speciesPrevious = new Species(*tbS);
+    this->react = std::vector<Reaction>(init_react);
     this->coord = new float[2];
     this->coord[0] = pos[0];
     this->coord[1] = pos[1];
 
-    s = gsl_odeiv_step_alloc (stepper, 2);
+    dim = species->ProductCount();
+
+    s = gsl_odeiv_step_alloc (stepper, dim);
     c = gsl_odeiv_control_y_new (1e-6, 0.0);
-    e = gsl_odeiv_evolve_alloc (2);
+    e = gsl_odeiv_evolve_alloc (dim);
 
-    std::cout<<this->coord[0]<<std::endl;
-
-    double mu = 10;
-    sys.dimension = 2;
-    sys.function = func;
-    sys.jacobian = jac;
-    sys.params = (void*)&mu;
+    sys.dimension = species->ProductCount();
+    sys.function = deriv;
+    sys.jacobian = nullptr;
+    sys.params = (void*)this;
 }
 
-    Ball& Ball::operator=(const Ball& rhs)
+Ball::Ball(const Ball& rhs)
+{
+    init = true;
+
+    this->species = new Species(*rhs.species);
+    this->react = std::vector<Reaction>(rhs.react);
+    index = rhs.index;
+    this->speciesPrevious = new Species(*rhs.speciesPrevious);
+
+
+
+
+    this->coord = new float[2];
+    this->coord[0] = rhs.coord[0];
+    this->coord[1] = rhs.coord[1];
+    //this->d = gsl_odeiv2_driver_alloc_y_new(&sys, gsl_odeiv2_step_bsimp, 1e-6, 1e-6, 0.0);
+
+    s = gsl_odeiv_step_alloc (stepper,species->ProductCount());
+    c = gsl_odeiv_control_y_new (1e-6, 0.0);
+    e = gsl_odeiv_evolve_alloc(species->ProductCount());
+
+    sys.dimension = species->ProductCount();
+    sys.function = deriv;
+    sys.jacobian = nullptr;
+    sys.params = (void*)this;
+}
+
+Ball& Ball::operator=(const Ball& rhs)
+{
+    init = true;
+
+    this->species = new Species(*rhs.species);
+    this->react = std::vector<Reaction>(rhs.react);
+    this->speciesPrevious = new Species(*rhs.speciesPrevious);
+    index = rhs.index;
+
+    this->coord = new float[2];
+    this->coord[0] = rhs.coord[0];
+    this->coord[1] = rhs.coord[1];
+    //this->d = gsl_odeiv2_driver_alloc_y_new(&sys, gsl_odeiv2_step_bsimp, 1e-6, 1e-6, 0.0);
+
+    s = gsl_odeiv_step_alloc (stepper, rhs.dim);
+    c = gsl_odeiv_control_y_new (1e-6, 0.0);
+    e = gsl_odeiv_evolve_alloc (rhs.dim);
+
+    sys.dimension = species->ProductCount();;
+    sys.function = deriv;
+    sys.jacobian = nullptr;
+    sys.params = (void*)this;
+}
+
+Species Ball::computeSprayed()
+{
+    int np = species->ProductCount();
+
+    float * products = new float[np];
+
+    for(int i = 0 ; i < np ; i ++)
     {
-        stepper = gsl_odeiv_step_bsimp;
-        this->species = rhs.species;
-        this->reactions = rhs.reactions;
-        this->reactionNumbers = rhs->reactionNumbers;
-        this->coord = new float[2];
-        this->coord[0] = rhs.coord[0];
-        this->coord[1] = rhs.coord[1];
-
-        s = gsl_odeiv_step_alloc (stepper, 2);
-        c = gsl_odeiv_control_y_new (1e-6, 0.0);
-        e = gsl_odeiv_evolve_alloc (2);
-
-        std::cout<<this->coord[0]<<std::endl;
-
-        double mu = 10;
-        sys.dimension = 2;
-        sys.function = func;
-        sys.jacobian = jac;
-        sys.params = (void*)&mu;
+        products[i] = species->getProductionConcentration(i) - speciesPrevious->getProductionConcentration(i);
+        if(products[i] < 0)
+            products[i] = 0;
     }
 
-    Ball::Ball(const Ball& rhs)
+    Species s(np, products, 0, products);
+    delete[] products;
+    return s;
+}
+
+Ball::Ball()
+{
+    init = false;
+}
+
+
+void Ball::log(int lvl, std::ostream &os)
+{
+
+    if((int)lvl & 0xA)
     {
-        stepper = gsl_odeiv_step_bsimp;
-        this->species = rhs.species;
-        this->reactions = rhs.reactions;
-        this->reactionNumbers = rhs->reactionNumbers;
-        this->coord = new float[2];
-        this->coord[0] = rhs.coord[0];
-        this->coord[1] = rhs.coord[1];
+        os << "Ball     : "<<this->index <<std::endl;
+        os << "coord    : "<< this->coord[0] << ", " <<this->coord[1] <<std::endl;
+        os << "in       : " ;
+        os << *species <<std::endl;
+        os << "out      : ";
+        os << computeSprayed() <<std::endl;
 
-        s = gsl_odeiv_step_alloc (stepper, 2);
-        c = gsl_odeiv_control_y_new (1e-6, 0.0);
-        e = gsl_odeiv_evolve_alloc (2);
-
-//        std::cout<<this->coord[0]<<std::endl;
-
-        double mu = 10;
-        sys.dimension = 2;
-        sys.function = func;
-        sys.jacobian = jac;
-        sys.params = (void*)&mu;
     }
+    if((int)lvl & 0x64)
+    {
+        os << "Reaction : "<<std::endl;
+        for(Reaction k : react)
+            os <<"           "<< k << std::endl;
+    }
+
+    os << std::endl;
+
+}
+
+void Ball::compute(float elapsed_time)
+{
+    double t = 0.0;
+    double h = 1e-3;
+    double * yn = new double[this->species->ProductCount()];
+    int nPB = species->ProductCount();
+    *speciesPrevious = *species;
+
+    for(int i = 0 ; i < this->species->ProductCount() ; i ++)
+        yn[i] = this->species->getProductionConcentration(i);
+
+    while (t < elapsed_time)
+    {
+        gsl_odeiv_evolve_apply (e, c, s, &sys, &t, elapsed_time, &h, yn);
+    }
+
+    delete this->species;
+    this->species = new Species(nPB,yn,0,yn);
+    delete[] yn;
+}
+
+void Ball::move()
+{
+    for(int i = 0 ; i < 2 ; i++) //Unroll dumb loop (performance wise) but 3D balls?
+    {
+        float mvt = (float)rand() / RAND_MAX; //O..1
+        mvt *= 2;       // 0..2
+        mvt -= 1;       // -1 .. 1
+        mvt *= 1E-3;    //-.01 .. 01
+
+        this->coord[i] += mvt;
+#pragma GCC message "Marche pas partout TODO"
+        if(this->coord[i]>=1 || this->coord<= 0)
+        {
+            this->coord[i]-=2*mvt;
+        }
+    }
+}
+
+float Ball::mcDonald(float r, float a) //Config avec les params Decay et k
+{
+    float D, k;
+    return (a/(2*M_PI*D)*boost::math::cyl_bessel_k(0,r*sqrt(k/D)));
+}
 
 
 float d(const Ball &b1, const Ball &b2)
@@ -77,47 +179,17 @@ float d(const Ball &b1, const Ball &b2)
     return std::hypot(x,y);
 }
 
-void Ball::compute(int n_steps)
-{
-#ifdef DEBUG
-    //std::cout<<"LALALAL : "<<this->coord[1]<<std::endl;
-    std::cout<<"LALALA"<<this->sys.dimension<<std::endl;
-    double t = 0.0, t1 = 5.0;
-    double h = 1e-6;
-    double y[2] = { 1.0, 0.0 };
-
-    while (t < t1)
-      {
-
-       // int status = gsl_odeiv_evolve_apply (e, c, s, &sys, &t, t1, &h, y);
-
-        //if (status != GSL_SUCCESS)
-          //  break;
-
-        printf ("%.5e %.5e %.5e\n", t, y[0], y[1]);
-      }
-
-#endif
-}
-
-
 Ball::~Ball()
 {
-    static int i = 0;
-//    std::cout << "Destructor je suis appelé pour là " << ++i <<"ieme fois"<<std::endl;
-
-    gsl_odeiv_evolve_free (e);
-    gsl_odeiv_control_free (c);
-    gsl_odeiv_step_free (s);
+    if(init)
+    {
+        delete[] coord;
+        gsl_odeiv_evolve_free (e);
+        gsl_odeiv_control_free (c);
+        gsl_odeiv_step_free (s);
+        if(species)
+        delete species;
+    }
+    //gsl_odeiv2_driver_free (d);
 }
 
-void Ball::move()
-{
-    for(int i = 0 ; i < 2 ; i++) //Unroll dumb loop (performance wise) but 3D balls? Oh YEAH
-        //Ou alors on décide à la compilation avec un if
-        do
-        {
-            this->coord[i] += (((float)(rand()/RAND_MAX))*2.f)-1.f; //En fait il faut bouger beaucoup moins que ça !
-        }
-        while(this->coord[i] >= 1 || this->coord[i] <= 0 );
-}

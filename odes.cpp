@@ -1,24 +1,71 @@
-#include"odes.h"
+#include "odes.h"
 
-int func (double t, const double y[], double f[],void *params)
+int deriv(double t, const double y[], double f[], void *params)
 {
-  double mu = *(double *)params;
-  f[0] = y[1];
-  f[1] = -y[0] - mu*y[1]*(y[0]*y[0] - 1);
-  return GSL_SUCCESS;
-}
+    Ball b = *((Ball*)(params));
+    Species s(*b.species);
+    //plutôt avec y pour la vitesse?
+    for(int i = 0 ; i < b.species->ProductCount() ; i++) f[i] = 0.0;
+
+    b.species->update(y);
+
+    for (int j = 0 ; j < b.react.size() ; j ++)
+    {
+        float rateLR = b.react[j].kp, rateRL = b.react[j].km;
+
+        for(int i = 0 ; i < b.react[j].right->size() ; i ++)
+            rateRL *= b.species->getProductConcentration(b.react[j].right->at(i));
+
+        for(int i = 0 ; i < b.react[j].left->size() ; i ++)
+            rateLR *= b.species->getProductConcentration(b.react[j].left->at(i));
 
 
-int jac (double t, const double y[], double *dfdy, double dfdt[], void *params)
-{
-    double mu = *(double *)params;
-    gsl_matrix_view dfdy_mat = gsl_matrix_view_array (dfdy, 2, 2);
-    gsl_matrix * m = &dfdy_mat.matrix;
-    gsl_matrix_set (m, 0, 0, 0.0);
-    gsl_matrix_set (m, 0, 1, 1.0);
-    gsl_matrix_set (m, 1, 0, -2.0*mu*y[0]*y[1] - 1.0);
-    gsl_matrix_set (m, 1, 1, -mu*(y[0]*y[0] - 1.0));
-    dfdt[0] = 0.0;
-    dfdt[1] = 0.0;
+        #pragma ivdep
+        for(int i = 0 ; i < b.react[j].right->size() ; i ++)
+        {
+            f[(int)b.react[j].right->at(i)] += rateLR;
+            f[(int)b.react[j].right->at(i)] -= rateRL;
+          //  f[(int)b.react[j].right->at(i)] = (f[(int)b.react[j].right->at(i)] * b.react[j].kp)/(1+f[(int)b.react[j].right->at(i)]);
+        }
+
+
+        #pragma ivdep
+        for(int i = 0 ; i < b.react[j].left->size() ; i ++)
+        {
+            f[(int)b.react[j].left->at(i)] += rateRL;
+            f[(int)b.react[j].left->at(i)] -= rateLR;
+           // f[(int)b.react[j].left->at(i)] = (f[(int)b.react[j].left->at(i)] * b.react[j].km )/(1+f[(int)b.react[j].left->at(i)]);
+        }
+
+    }
+
     return GSL_SUCCESS;
 }
+
+
+void deriv(double f[], void *params)
+{
+    Ball b = *((Ball*)(params));
+
+    for(int i = 0 ; i < b.species->ProductCount() ; i++) f[i] = 0.0;
+
+    for (int j = 0 ; j < b.react.size() ; j ++)
+    {
+        float rateLR = b.react[j].kp;
+
+        for(int i = 0 ; i < b.react[j].left->size() ; i ++)
+            rateLR *= b.species->getProductConcentration(b.react[j].left->at(i));
+
+        #pragma ivdep
+        for(int i = 0 ; i < b.react[j].right->size() ; i ++)
+        {
+            f[(int)b.react[j].right->at(i)] += rateLR;
+        }
+    }
+}
+
+
+/*int jaco(double t, const double y[], double *dfdy, double dfdt[], void *params)
+{
+    //Seul la premiere colonne est remplie !
+}*/

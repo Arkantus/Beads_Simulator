@@ -16,13 +16,9 @@ class plateau
 private:
 
 public:
-    plateau(std::vector<Ball*> *p);
+    plateau(std::vector<Ball> *p);
     void init (int dx, int dy);
-    std::vector<Ball*>* balls;
-    void communicate();
-
-    //std::vector<std::vector<Species*>> surface;
-
+    std::vector<Ball>* balls;
 };
 
 #endif // PLATEAU_H

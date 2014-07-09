@@ -4,10 +4,12 @@
 #include "gsl/gsl_odeiv.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
+#include <algorithm>
+#include "ball.h"
 
-#ifdef DEBUG
-    int func (double t, const double y[], double f[],void *params);
-    int jac (double t, const double y[], double *dfdy, double dfdt[], void *params);
-#endif
+int deriv(double t, const double y[], double f[], void *params);
+void deriv(double f[], void *params);
+
+//int jaco(double t, const double y[], double *dfdy, double dfdt[], void *params);
 
 #endif // ODES_H

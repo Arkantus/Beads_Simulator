@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
-//#include <QtCore/QSettings>
+#include <QtCore/QSettings>
 
 class Configuration
 {
@@ -13,22 +13,26 @@ public:
     Configuration();
     void setParallel(int nb, int nbMax = -1);
     void ReadConf(std::string file);
-    std::vector<Ball*>* tbr;
+    int numBalls();
 
-    float threshold;
+    static const bool gBrownian = true;
+
+    static float threshold;
+    static float D_chemicals;        //µm².min**-1
+    static float decay;    //min**-1
+    static float D_beads;
+
+    int totalSteps;
+
+    std::vector<Ball>* tbr;
 
     //QSettings settings;
 
-    std::vector<Ball *> *getBalls();
+    std::vector<Ball> *getBalls();
 
-    int totalSteps;
-    int reactSteps;
 
-    int density_x;
-    int density_y;
+   // ~Configuration();
 
-    float** diffusionCoeff;
-    int diffusionNode;
 };
 
 #endif // CONFIGURATION_H

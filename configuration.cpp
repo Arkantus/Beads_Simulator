@@ -1,13 +1,10 @@
 #include "configuration.h"
 
-Configuration::Configuration():
-totalSteps(5), reactSteps(1),tbr(new std::vector<Ball*>(12)), threshold(0.2), density_x(5), density_y(5), diffusionNode(3)
+
+
+
+Configuration::Configuration()
 {}
-
-void Configuration::setParallel(int nb, int nbMax)
-{
-
-}
 
 void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_balls/world.conf")
 {
@@ -18,34 +15,74 @@ void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_
     if(!world.is_open())
     {
         std::cerr<<"File " <<file<< " was not found, using default values"<<std::endl;
-        //default
-        density_x = 5;
-        density_y = 5;
 
-        threshold = 0.2;
+        int nb = 9;
+        totalSteps = 5000;
+        tbr =new std::vector<Ball>(nb);
 
-        //tbr = new std::vector<Ball*>(12);
-        std::cout<<"ICi"<<std::endl;
-
-        for(int i = 0 ; i < 10; i++)
+        for(int i = 0 ; i < nb; i++)
         {
-            float t[]= {0,0};
-            //std::cout<<i<<std::endl;
-            t[0] = t[1] = 0.1*(2+(float)i);
-            Species *s = new Species(2,t,2,t);
-            Reaction *r = new Reaction();
-            Ball* k = new Ball(s, r ,2 ,t );
-            //std::cout<<"juste une truc"<<std::endl;
+            Species * s;
+            float* t;
+            float pos[2] = {(i+1)/10.f,(i+1)/10.f};
+            std::vector<Reaction> reac;
 
-            tbr->push_back(k);
+            if(i%3 == 0)
+            {
+                t = new float[4];
+                t[0] = 20.f;
+                t[1] = 0.f;
+                t[2] = 0.f;
+                t[3] = 0.f;
+
+                s = new Species(3,t,1,&t[0]);
+
+                t[1]/=2;
+
+                reac.push_back(Reaction("A = B ", .5f, 0.0f));
+                //reac.push_back(Reaction("A = A A", .2f,0.f));
+
+            }
+            else if ((i+2)%3 == 0)
+            {
+                t = new float[4];
+                t[0] = 0.f;
+                t[1] = 0.f;
+                t[2] = 0.f;
+                t[3] = 0.f;
+
+                s = new Species(3,t,1,&t[0]);
+
+                t[1]/=2;
+
+                reac.push_back(Reaction("B = A", .5f, 0.0f));
+            }
+            else
+            {
+                t = new float[4];
+                t[0] = 0.f;
+                t[1] = 0.f;
+                t[2] = 0.f;
+                t[3] = 0.f;
+
+                s = new Species(3,t,1,&t[0]);
+
+                t[1]/=2;
+
+                reac.push_back(Reaction("C = C", 1.f, 0.0f));
+            }
+
+            Species * tbS = new Species(3,&t[1],0,t);
+
+            Ball k = Ball(s, reac ,pos,tbS);
+
+            (*tbr)[i] = k;
+
+            delete s;
+            delete tbS;
+            delete[] t;
         }
-        std::cout<<"ICi"<<std::endl;
-        std::flush(std::cout);
-
-        diffusionNode = 3;
-        diffusionCoeff = new float*[diffusionNode];
-        for(int i = 0 ; i < diffusionNode ; i++)
-            diffusionCoeff[i] = new float[diffusionNode];
+        tbr->shrink_to_fit(); //Fait rien en fait
 
         std::cout<<"Fin de ReadConf"<<std::endl;
     }
@@ -58,14 +95,25 @@ void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_
         world.close();
     }
 }
-#ifdef DEBUG
-std::vector<Ball*> *Configuration::getBalls()
+
+int Configuration::numBalls()
 {
-    return tbr; //A remplir pour les tests
+    return tbr->size();
 }
+#ifdef DEBUG
+std::vector<Ball> *Configuration::getBalls()
+{
+    return tbr;
+}
+
+
 #else
 std::vector<Ball> *Configuration::getBalls()
 {
     return new std::vector<Ball>(5); //A remplir pour les tests
 }
 #endif
+/*Configuration::~Configuration()
+{
+    //delete tbr;
+}*/

@@ -1,21 +1,19 @@
 #include "reaction.h"
 
 
-Reaction::Reaction(): Reaction::Reaction(std::string("Default"))
+Reaction::Reaction()
 {
-
-}
-Reaction::Reaction(std::string chaine)
-{
-    //for push_back
-#ifdef DEBUG
     left = new std::vector<Product>(2);
-    right = new std::vector<Product>(1);
-    E = Enzyme::E1;
-    left->push_back(Product::A);
-    left->push_back(Product::B);
-    right->push_back(Product::C);
-#else
+    right = new std::vector<Product>(2);
+}
+Reaction::Reaction(std::string chaine, float _kp, float _km)
+{
+    km = _km;
+    kp = _kp;
+    left = new std::vector<Product>();
+    right = new std::vector<Product>();
+    std::vector<Product> * reac;
+    reac = left;
     std::string buf;
     std:: stringstream ss(chaine);
     std::vector<std::string> tokens;
@@ -23,18 +21,47 @@ Reaction::Reaction(std::string chaine)
         tokens.push_back(buf);
     for(std::string s : tokens)
     {
-        if(s.length() == 1)
-        {//product
-
+        if(s.length() == 1 && std::isalpha(s[0])){
+            reac->push_back(static_cast<Product>((int)s[0]-'A')); //degeu (Award level) !
+            std::clog<<s<<"  " <<((int)s[0]-'A') <<std::endl;
         }
-        else if(s.length() == 2)
-        {//Enzyme
 
-        }
+        else if(s.length() > 1 && s[0] == 'E')
+            E = static_cast<Enzyme>(s[1]);
+
         else
-        {
-            // ==> or <== or <==>
-        }
+            if(s[0] == '=') // ou s[1] pas de jaloux
+                reac = right;
     }
-#endif
+    left->shrink_to_fit();
+    right->shrink_to_fit();
+}
+
+Reaction::Reaction(const Reaction & rhs)
+{
+    this->E = rhs.E;
+    this->km = rhs.km;
+    this->kp = rhs.kp;
+    this->left = new std::vector<Product>(*rhs.left);
+    this->right = new std::vector<Product>(*rhs.right);
+}
+
+Reaction::~Reaction()
+{
+    delete left;
+    delete right;
+}
+
+std::ostream& operator <<(std::ostream &of, const Reaction &r)
+{
+    //if((int)r.E)
+    //    of << (int)r.E;
+    for(Product p : *r.left)
+        of << (char)((int)p+'A')<<" ";
+    of << "==> ";
+    for(Product p : *r.right)
+        of << (char)((int)p+'A') << " ";
+    of << "\t[k_p : " << r.kp <<"\t"<< " k_m : "<<r.km<<"]";
+
+    return of;
 }

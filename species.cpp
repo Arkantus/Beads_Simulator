@@ -2,57 +2,102 @@
 
 
 Species::Species(int prodCount, float *prodConc, int enzyCount, float *enzyConc):
-    pCount(prodCount), eCount(enzyCount), pConc(prodConc), eConc(enzyConc)
+    pCount(prodCount), eCount(enzyCount)
 {
+    pConc = new float[pCount];
+    for(int i = 0 ; i < pCount ; i ++ )
+        pConc[i] = prodConc[i];
+    eConc = new float[eCount];
+    for(int i = 0 ; i < eCount ; i ++ )
+        eConc[i] = enzyConc[i];
 
-}
-//Species::Species(){}
-
-std::string Species::getString()
-{
-    std::stringstream ss;
-    ss << pCount << " : ";
-    for(int i = 0 ; i < pCount ; i ++)
-        ss << pConc[i] << ", ";
-    ss << eCount << " : ";
-    for(int i = 0 ; i < eCount ; i ++)
-        ss << eConc[i] << ", ";
-    ss<<std::endl;
-    return ss.str();
 }
 
 
-Species Species::operator *(const int factor)
+Species::Species(int prodCount, double *prodConc, int enzyCount, double *enzyConc):
+    pCount(prodCount), eCount(enzyCount)
 {
-    Species *s = new Species(*this);
+    pConc = new float[pCount];
+    for(int i = 0 ; i < pCount ; i ++ )
+        pConc[i] = (float)prodConc[i];
+    eConc = new float[eCount];
+    for(int i = 0 ; i < eCount ; i ++ )
+        eConc[i] = (float)enzyConc[i];
+
+}
+
+Species::Species()
+{
+    eConc = new float[0];
+    pConc = new float[0];
+
+}
+const int Species::ProductCount()
+{
+    return pCount;
+}
+
+void Species::update(float * c)
+{
+    for(int i = 0 ; i < this->pCount ; i ++)
+        pConc[i]= c[i];
+}
+
+void Species::update(const double *& c)
+{
+    for(int i = 0 ; i < this->pCount ; i ++)
+        pConc[i]= c[i];
+}
+
+void Species::updateBang(double * c)
+{
+    for(int i = 0 ; i < this->pCount ; i ++)
+        pConc[i] +=(float) c[i];
+}
+
+Species Species::operator *(const float factor)
+{
+    Species s = (*this);
     for(int i = 0 ; i < this->pCount ; i++)
     {
-        s->pConc[i] *= factor;
+        s.pConc[i] *= factor;
     }
     for(int i = 0 ; i < this->eCount ; i++)
     {
-        s->eConc[i] *= factor;
+        s.eConc[i] *= factor;
     }
-    return (*s);
+    return (s);
+}
+
+Species::~Species()
+{
+    delete[] pConc;
+    delete[] eConc;
 }
 
 void Species::operator +=(const Species & rhs)
 {
-    for(int i = 0 ; i < this->pCount ; i++)
+    for(int i = 0 ; i < rhs.pCount ; i++)
     {
         pConc[i] += rhs.pConc[i];
     }
-    for(int i = 0 ; i < this->eCount ; i++)
+    for(int i = 0 ; i < rhs.eCount ; i++)
     {
         eConc[i] += rhs.eConc[i];
     }
 }
 
+void Species::operator *=(const float rhs)
+{
+    for(int i = 0 ; i < this->pCount ; i++)
+        pConc[i] *= rhs;
+}
+
 void Species::operator=(const Species & rhs)
 {
-#ifdef DEBUG
-    std::cout<<"Toi ! "<<std::endl;
-#endif
+    this->pCount = rhs.pCount;
+    this->eCount = rhs.eCount;
+
     this->pConc = new float[rhs.pCount];
     this->eConc = new float[rhs.eCount];
 
@@ -60,15 +105,13 @@ void Species::operator=(const Species & rhs)
         pConc[i] = rhs.pConc[i];
     for(int i = 0 ; i < rhs.eCount ; i ++)
         eConc[i] = rhs.eConc[i];
-
-    this->pCount = rhs.pCount;
-    this->eCount = rhs.eCount;
-
-
 }
 
 Species::Species(const Species& rhs)
 {
+    this->pCount = rhs.pCount;
+    this->eCount = rhs.eCount;
+
     this->pConc = new float[rhs.pCount];
     this->eConc = new float[rhs.eCount];
 
@@ -80,26 +123,35 @@ Species::Species(const Species& rhs)
 
 std::ostream &operator <<(std::ostream &os, const Species &s)
 {
-    return os; // << s.
-}
-
-
-float Species::getProductionConcentration(int p)
-{
-    if(p < pCount)
+    os << s.pConc[0];
+    for(int i = 1 ; i < s.pCount ; i++)
     {
-        return pConc[p];
+        os << " ; " << s.pConc[i];
     }
-}
-
-std::ofstream &Species::operator <<(std::ofstream &os)
-{
-    os << "Produit : "<<this->pCount <<std::endl;
-    os << this->pConc[0];
-    for(int i = 1 ; i < this->pCount ; i++)
-    {
-        os << " ; " << this->pConc[i];
-    }
-    os<<std::endl;
     return os;
+}
+
+
+float Species::getProductionConcentration(int p) const
+{
+    return pConc[p];
+}
+
+float Species::getProductConcentration(Product p) const
+{
+    return pConc[(int)p];
+}
+
+Species operator*(float factor, Species rhs)
+{
+    Species s = rhs;
+    for(int i = 0 ; i < rhs.pCount ; i++)
+    {
+        s.pConc[i] *= factor;
+    }
+    for(int i = 0 ; i < rhs.eCount ; i++)
+    {
+        s.eConc[i] *= factor;
+    }
+    return (s);
 }

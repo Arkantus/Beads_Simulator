@@ -7,8 +7,11 @@
 #include "gsl/gsl_odeiv.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_odeiv2.h>
 #include "odes.h"
 #include <cstdlib>
+#include <ostream>
+#include <boost/math/special_functions.hpp>
 
 #ifdef DEBUG
     #include <iostream>
@@ -17,36 +20,52 @@
 class Ball
 {
 private:
-    Reaction * reactions;
-    int reactionNumbers;
-    float * coord;
-    //constexpr
-    gsl_odeiv_step_type * stepper;// = gsl_odeiv_step_bsimp;
+    float mass;
+    std::vector<Reaction> react;
+    bool init;
+    const gsl_odeiv_step_type * stepper = gsl_odeiv_step_rkf45;
     gsl_odeiv_step * s;
     gsl_odeiv_control * c;
     gsl_odeiv_evolve * e;
     gsl_odeiv_system sys;
+    //gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rk8pd,1e-6, 1e-6, 0.0);
+    size_t dim;
+    static int index_max;
+    int index;
 
 
 public:
+    float * coord;
+    int reactionNumbers;
+    Species * species;
+    Species * speciesPrevious;
+
+    Species computeSprayed();
+
     Ball();
-    Ball(const Ball&);
-    float x();
-    float y();
-    Species* species;
-    friend float d(const Ball& b1, const Ball& b2);
-    void move();
     Ball(Species*, Reaction*, int, float*);
-    void compute(int n_steps);
+    Ball(Species*, std::vector<Reaction> init_react, float*, Species*);
+
+    Ball(const Ball&);
     Ball& operator=(const Ball&);
-    Species getSpecies();
+
+    Species getSpecies() const;
+
+    friend float d(const Ball& b1, const Ball& b2);
+    friend int deriv(double t, const double y[], double f[],void *params);
+
+    static float mcDonald(float r, float a);
+
+    void move();
+    void compute(float);
+
     ~Ball();
 
+    enum logLevel{nothing=0,concentration=10,reaction=100};
+    void log(int, std::ostream& os); //enum class avec differnt niveaux !
+
+
+
 };
-
-//int func2 (double t, const double y[], double f[],void *params);
-//int jac2 (double t, const double y[], double *dfdy, double dfdt[], void *params);
-
-
 
 #endif // BALL_H
