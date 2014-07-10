@@ -39,6 +39,7 @@ public:
     friend std::ostream& operator << (std::ostream& os, const Species& s );
     ~Species();
     float * pConc, *eConc;
+    void reset();
 
 
 private:

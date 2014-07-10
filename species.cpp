@@ -30,6 +30,8 @@ Species::Species()
 {
     eConc = new float[0];
     pConc = new float[0];
+    eCount = 0;
+    pCount =0;
 
 }
 const int Species::ProductCount()
@@ -73,6 +75,12 @@ Species::~Species()
 {
     delete[] pConc;
     delete[] eConc;
+}
+
+void Species::reset()
+{
+    for(int i = 0 ; i < pCount ; i ++)
+        pConc[i] = 0.;
 }
 
 void Species::operator +=(const Species & rhs)

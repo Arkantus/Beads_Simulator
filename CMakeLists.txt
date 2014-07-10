@@ -9,7 +9,7 @@ ADD_DEFINITIONS(
 
     -march=core-avx2
     -O3
-    #-fopenmp
+    -fopenmp
     -ffat-lto-objects
     #-fopenmp-simd
     #-Wopenmp-simd

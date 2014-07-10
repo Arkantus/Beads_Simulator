@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <QtCore/QSettings>
+#include <cstdlib>
 
 class Configuration
 {
@@ -22,17 +23,15 @@ public:
     static float decay;    //min**-1
     static float D_beads;
 
-    int totalSteps;
+    static int totalSteps;
 
     std::vector<Ball>* tbr;
 
     //QSettings settings;
 
     std::vector<Ball> *getBalls();
-
-
-   // ~Configuration();
-
 };
+
+
 
 #endif // CONFIGURATION_H

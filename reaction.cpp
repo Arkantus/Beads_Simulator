@@ -5,6 +5,9 @@ Reaction::Reaction()
 {
     left = new std::vector<Product>(2);
     right = new std::vector<Product>(2);
+    E = static_cast<Enzyme>(0);
+    km = 0;
+    kp = 0;
 }
 Reaction::Reaction(std::string chaine, float _kp, float _km)
 {
@@ -54,8 +57,6 @@ Reaction::~Reaction()
 
 std::ostream& operator <<(std::ostream &of, const Reaction &r)
 {
-    //if((int)r.E)
-    //    of << (int)r.E;
     for(Product p : *r.left)
         of << (char)((int)p+'A')<<" ";
     of << "==> ";

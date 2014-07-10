@@ -1,13 +1,23 @@
 #include "configuration.h"
 
-
+int Configuration::totalSteps = 10;
+float Configuration::threshold = 1.f;
+float Configuration::D_chemicals =1000.f;// 10000.f;// Calculer //µm².min**-1
+float Configuration::decay = .9f;
+float Configuration::D_beads = 12.f;
 
 
 Configuration::Configuration()
-{}
+{
+
+
+}
 
 void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_balls/world.conf")
 {
+
+
+
     std::cout<<"Debut de ReadConf" << std::endl;
     std::string temp;
     std::ifstream world;
@@ -16,18 +26,19 @@ void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_
     {
         std::cerr<<"File " <<file<< " was not found, using default values"<<std::endl;
 
-        int nb = 9;
-        totalSteps = 5000;
+        int nb = 50;
         tbr =new std::vector<Ball>(nb);
 
-        for(int i = 0 ; i < nb; i++)
+        for(int i = 1 ; i < nb+1; i++)
         {
             Species * s;
             float* t;
-            float pos[2] = {(i+1)/10.f,(i+1)/10.f};
+            float x = rand()/(float)RAND_MAX;
+            float y = rand()/(float)RAND_MAX;
+            float pos[2] = {x,y};
             std::vector<Reaction> reac;
 
-            if(i%3 == 0)
+            if(i%2 == 0)
             {
                 t = new float[4];
                 t[0] = 20.f;
@@ -39,8 +50,9 @@ void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_
 
                 t[1]/=2;
 
-                reac.push_back(Reaction("A = B ", .5f, 0.0f));
-                //reac.push_back(Reaction("A = A A", .2f,0.f));
+                reac.push_back(Reaction("A = B", 100.f, 0.0f));
+                reac.push_back(Reaction("A = C", 50.f, 0.0f));
+
 
             }
             else if ((i+2)%3 == 0)
@@ -55,7 +67,9 @@ void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_
 
                 t[1]/=2;
 
-                reac.push_back(Reaction("B = A", .5f, 0.0f));
+                reac.push_back(Reaction("B = C", 100.f, 0.0f));
+                reac.push_back(Reaction("B = A", 50.f, 0.0f));
+
             }
             else
             {
@@ -67,21 +81,17 @@ void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_
 
                 s = new Species(3,t,1,&t[0]);
 
-                t[1]/=2;
-
-                reac.push_back(Reaction("C = C", 1.f, 0.0f));
+                reac.push_back(Reaction("C = A", 50.f, 0.0f));
             }
 
-            Species * tbS = new Species(3,&t[1],0,t);
+            Ball k = Ball(s, reac ,pos);
 
-            Ball k = Ball(s, reac ,pos,tbS);
+                (*tbr)[i-1] = k;
 
-            (*tbr)[i] = k;
+                delete s;
+                delete[] t;
+            }
 
-            delete s;
-            delete tbS;
-            delete[] t;
-        }
         tbr->shrink_to_fit(); //Fait rien en fait
 
         std::cout<<"Fin de ReadConf"<<std::endl;
@@ -96,6 +106,8 @@ void Configuration::ReadConf(std::string file = "/home/marc/workspace/synthetic_
     }
 }
 
+
+
 int Configuration::numBalls()
 {
     return tbr->size();
@@ -105,8 +117,6 @@ std::vector<Ball> *Configuration::getBalls()
 {
     return tbr;
 }
-
-
 #else
 std::vector<Ball> *Configuration::getBalls()
 {
