@@ -1,0 +1,9 @@
+Diffusivity_Beads 12.0
+Diffusivity_Chemi 10000.0
+Decay_k 0.9
+BeadSize 10.0
+TotalSteps 100
+NumProd 3
+sx 12.0
+sy 12.0
+world /home/marc/workspace/synthetic_balls-build/world.40b.3eq

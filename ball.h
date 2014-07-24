@@ -42,7 +42,7 @@ public:
     Species productedSpecies;
 
     Ball();
-    Ball(Species*, Reaction*, int, float*);
+    //Ball(Species*, Reaction*, int, float*);
     Ball(Species*, std::vector<Reaction> init_react, float*);
 
     Ball(const Ball&);
@@ -55,7 +55,7 @@ public:
     friend void deriv(double f[], void *params);
 
     void move();
-    void compute(float);
+    void compute(float = 0.01f);
 
     ~Ball();
 

@@ -5,12 +5,12 @@ add_executable(${PROJECT_NAME} ${SRC_LIST})
 ADD_DEFINITIONS(
     -std=c++11
     #-fsanitize=undefined
-    #-g
+    -g
 
-    -march=core-avx2
-    -O3
-    -fopenmp
-    -ffat-lto-objects
+    #-march=core-avx2
+    #-O3
+    #-fopenmp
+    #-ffat-lto-objects
     #-fopenmp-simd
     #-Wopenmp-simd
     #-ftree-vectorizer-verbose=3

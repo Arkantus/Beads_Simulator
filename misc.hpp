@@ -5,7 +5,7 @@
 
 
 float mixingCoeff(const float d);
-float mcDonald(const float r); //Config avec les params Decay et k
+float mcDonald(float r); //Config avec les params Decay et k
 
 
 #endif //MISC_H

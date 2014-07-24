@@ -22,10 +22,9 @@ int main()
     std::ofstream f_out("data.log");
 
     Configuration params;
-    params.ReadConf("../parameters");
+    params.ReadConf();
 
-    plateau * surf = new plateau(params.getBalls());
-    surf->init(5,5);
+    std::vector<Ball>* balls = params.getBalls();
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
@@ -36,32 +35,29 @@ int main()
         std::cout<<"# Step : " << i <<std::endl<<std::endl;
         if(i%1==0)
         {
-            lcd.render(surf->balls,params);
+            lcd.render(balls,params);
             lcd.make();
         }
        #pragma omp parallel for
-       for(int j = 0 ; j < surf->balls->size() ; j ++)
+       for(int j = 0 ; j < balls->size() ; j ++)
         {
-            surf->balls->at(j).compute(0.1);
-            surf->balls->at(j).log(Ball::logLevel::concentration | Ball::logLevel::reaction, f_out); //plutôt avec une queue !
+            balls->at(j).compute();
+            balls->at(j).log(Ball::logLevel::concentration | Ball::logLevel::reaction, f_out); //plutôt avec une queue !
             if(Configuration::gBrownian)
-                surf->balls->at(j).move();
+                balls->at(j).move();
         }
 
-        std::vector<Ball> temp(*surf->balls);
+        std::vector<Ball> temp(*balls);
 
-        for(int i = 0 ; i < surf->balls->size() ; i ++)
+        for(int i = 0 ; i < balls->size() ; i ++)
         {
-            (*surf->balls)[i].species->reset();
-            for(int j = 0 ; j <  surf->balls->size() ; j++)
+            (*balls)[i].species->reset();
+            for(int j = 0 ; j <  balls->size() ; j++)
             {
-                float distance = d((surf->balls->at(i)),(surf->balls->at(j)));
-                //if (distance < params.threshold)
-                //{
-                    (*surf->balls)[i].species->pConc[0] += mcDonald(distance) * (temp.at(j).productedSpecies.pConc[0]);
-                    (*surf->balls)[i].species->pConc[1] += mcDonald(distance) * (temp.at(j).productedSpecies.pConc[1]);
-                    (*surf->balls)[i].species->pConc[2] += mcDonald(distance) * (temp.at(j).productedSpecies.pConc[2]);
-                //}
+                float distance = d(temp[i],temp[j]);
+                (*balls)[i].species->pConc[0] += mcDonald(distance) * (temp.at(j).productedSpecies.pConc[0]);
+                (*balls)[i].species->pConc[1] += mcDonald(distance) * (temp.at(j).productedSpecies.pConc[1]);
+                (*balls)[i].species->pConc[2] += mcDonald(distance) * (temp.at(j).productedSpecies.pConc[2]);
             }
         }
     }

@@ -7,21 +7,29 @@
 #include <fstream>
 #include <QtCore/QSettings>
 #include <cstdlib>
+#include <map>
 
 class Configuration
 {
 public:
     Configuration();
     void setParallel(int nb, int nbMax = -1);
-    void ReadConf(std::string file);
+    void ReadConf(std::string file = "/home/marc/workspace/synthetic_balls/params.cnf");
+    void createDefaultWorld(int);
+    void convert();
     int numBalls();
 
     static const bool gBrownian = true;
 
+    std::map<std::string,float> mp;
+
     static float threshold;
     static float D_chemicals;        //µm².min**-1
-    static float decay;    //min**-1
+    static float k_decay;    //min**-1
     static float D_beads;
+    //static float size_x;
+    //static float size_y;
+    static float beadSize;
 
     static int totalSteps;
 
