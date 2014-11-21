@@ -19,6 +19,8 @@ Ball::Ball(Species* init_s, std::vector<Reaction> init_react, float * pos)
     dim = species->ProductCount();
 
     a = new float[dim];
+
+    init_integrator();
 }
 
 Ball::Ball(const Ball& rhs)
@@ -40,6 +42,8 @@ Ball::Ball(const Ball& rhs)
     this->coord = new float[2];
     this->coord[0] = rhs.coord[0];
     this->coord[1] = rhs.coord[1];
+
+    init_integrator();
 }
 
 Ball& Ball::operator=(const Ball& rhs)
@@ -61,6 +65,17 @@ Ball& Ball::operator=(const Ball& rhs)
     this->coord = new float[2];
     this->coord[0] = rhs.coord[0];
     this->coord[1] = rhs.coord[1];
+
+    init_integrator();
+}
+
+void Ball::init_integrator()
+{
+    //this->c =
+    s = gsl_odeiv_step_alloc(stepper,dim);
+    c = gsl_odeiv_control_y_new(1e-6,0.0);
+    e = gsl_odeiv_evolve_alloc(dim);
+
 }
 
 Ball::Ball()
@@ -110,7 +125,7 @@ void Ball::move()
         float mvt = (float)rand() / RAND_MAX; //O..1
         mvt *= 2;       // 0..2
         mvt -= 1;       // -1 .. 1
-        mvt *= 1E-3;    //-.01 .. 01
+        mvt *= 1E-1;    //-.01 .. 01
 
         this->coord[i] += mvt;
 #pragma GCC message "Marche pas partout TODO"
@@ -139,6 +154,9 @@ Ball::~Ball()
         if(species)
         delete species;
         delete[] a;
+        gsl_odeiv_evolve_free(e);
+        gsl_odeiv_control_free(c);
+        gsl_odeiv_step_free(s);
     }
 }
 

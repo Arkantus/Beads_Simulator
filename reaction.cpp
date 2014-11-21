@@ -27,7 +27,7 @@ Reaction::Reaction(std::string chaine, float _kp, float _km)
         if(s.length() == 1 && std::isalpha(s[0]))
         {
             reac->push_back(static_cast<Product>((int)s[0]-'A')); //degeu (Award level) !
-            std::clog<<s<<"  " <<((int)s[0]-'A') <<std::endl;
+           // std::clog<<s<<"  " <<((int)s[0]-'A') <<std::endl;
         }
 
         else if(s.length() > 1 && s[0] == 'E')
@@ -37,7 +37,7 @@ Reaction::Reaction(std::string chaine, float _kp, float _km)
             if(s[0] == '=') // ou s[1] pas de jaloux
             {
                 reac = right;
-                std::clog<<s<<"="<<std::endl;
+              //  std::clog<<s<<"="<<std::endl;
             }
     }
     left->shrink_to_fit();

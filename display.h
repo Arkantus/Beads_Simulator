@@ -18,6 +18,8 @@ public:
     void render(const std::vector<Ball> *, const Configuration &);
     void make();
     void OutputRawData(const std::vector<Ball> *);
+    void DrawMultiPPM(const std::vector<Ball>* vb, const Configuration& config, std::string output="datll");
+
 
 
 private:
@@ -25,6 +27,7 @@ private:
     void savePPM();
     void drawPPM(const std::vector<Ball> *, const Configuration &);
     void drawSDL(const std::vector<Ball> *, const Configuration &);
+
 
     bool SDL;
     SDL_Window *window;

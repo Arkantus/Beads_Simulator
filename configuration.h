@@ -8,6 +8,7 @@
 #include <QtCore/QSettings>
 #include <cstdlib>
 #include <map>
+#include<ctime>
 
 class Configuration
 {

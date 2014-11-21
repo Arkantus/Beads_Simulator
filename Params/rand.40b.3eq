@@ -1,0 +1,18 @@
+ball 1
+rand
+1
+A = B A C
+70 0
+20.0 0.0 0.0
+ball 1
+rand
+1
+B = C B
+50 0
+0.0 0.0 0.0
+ball 1
+rand
+1
+C = A C
+60 0 
+0.0 0.0 0.0

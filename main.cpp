@@ -66,9 +66,9 @@ int main()
 
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
-    std::cout<<"Time elapsed : "<<elapsed_seconds.count()<<"s"<<std::endl;
+    std::cout<<"Time elapsed: "<<elapsed_seconds.count()<<"s"<<std::endl;
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-    std::cout << "finished computation at " << std::ctime(&end_time)<<std::endl;
+    std::cout << "Finished computation at: " << std::ctime(&end_time)<<std::endl;
 
     return 0;
 }
