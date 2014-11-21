@@ -1,0 +1,9 @@
+# ignore generated html files,
+*.sdf
+*.opensdf
+*.sln
+*.suo
+*.vcxproj
+*.filters
+*.user
+/nbproject/*
