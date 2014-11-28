@@ -1,3 +1,4 @@
+
 *.sdf
 *.opensdf
 *.sln
@@ -6,3 +7,4 @@
 *.filters
 *.user
 /nbproject/*
+*~

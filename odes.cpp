@@ -65,6 +65,28 @@ void deriv(double f[], void *params)
 }
 
 
+/*void deriv(double f[],float timestep, void *params)
+{
+    //timestep <= 1
+    Ball b = *((Ball*)(params));
+
+    for(int i = 0 ; i < b.species->ProductCount() ; i++) f[i] = 0.0;
+
+    for (int j = 0 ; j < b.react.size() ; j ++)
+    {
+        float rateLR = b.react[j].kp;
+
+        for(int i = 0 ; i < b.react[j].left->size() ; i ++)
+            rateLR *= b.species->getProductConcentration(b.react[j].left->at(i));
+
+        #pragma ivdep
+        for(int i = 0 ; i < b.react[j].right->size() ; i ++)
+        {
+            f[(int)b.react[j].right->at(i)] += rateLR;
+        }
+    }    
+}
+
 /*int jaco(double t, const double y[], double *dfdy, double dfdt[], void *params)
 {
     //Seul la premiere colonne est remplie !

@@ -1,14 +1,16 @@
 #include "configuration.h"
 
-int Configuration::totalSteps = 100;
+int Configuration::totalSteps = 50;
 float Configuration::threshold = 1.f;
-float Configuration::D_chemicals =1000.f;// 10000.f;// Calculer //µm².min**-1
-float Configuration::k_decay = .9f;
+float Configuration::D_chemicals =100000.f;// 10000.f;// Calculer //µm².min**-1
+float Configuration::k_decay = sqrt(Configuration::D_chemicals);//.7f;
 float Configuration::D_beads = 12.f;
 float Configuration::beadSize = 10.f; //µm
 
 
-Configuration::Configuration(){}
+Configuration::Configuration(){
+    srand(time(NULL));
+}
 
 void Configuration::convert()
 {
@@ -92,11 +94,15 @@ void Configuration::ReadConf(std::string file)
             size_t pos = 0;
             std::string concent;
             std::getline(world,concent);
+            //std::cout << concent ;
             int nprod = mp["NumProd"];  //TODO Changer ça
             float * conc = new float[nprod];
             for(int j = 0; j < nprod ; j++)
             {
                 conc[j] = std::stof(concent.substr(pos),&pos);
+                std::cout<<concent<<std::endl;
+                std::cout<<concent.substr(pos)<<std::endl;
+                std::cout<<conc[j]<<std::endl;
             }
             Species* s = new Species(nprod,conc,0,conc);
 
@@ -189,8 +195,6 @@ void Configuration::createDefaultWorld(int nb)
 
     //tbr->shrink_to_fit(); //Fait rien en fait
 }
-
-
 
 int Configuration::numBalls()
 {
